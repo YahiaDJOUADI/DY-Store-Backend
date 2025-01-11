@@ -1,6 +1,6 @@
 const Product = require("../models/Product");
 
-// Get all Products
+// Get all products
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find();
@@ -10,7 +10,7 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// Get a Product by ID
+// Get a product by ID
 exports.getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -23,11 +23,11 @@ exports.getProduct = async (req, res) => {
   }
 };
 
-// Add a new Product
+// Add a new product
 exports.addProduct = async (req, res) => {
   try {
     const { name, category, price, description, rating } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : ''; // Handle image upload
+    const image = req.file ? `/uploads/${req.file.filename}` : ""; // Handle image upload
 
     const newProduct = new Product({
       name,
@@ -45,7 +45,7 @@ exports.addProduct = async (req, res) => {
   }
 };
 
-// Delete a Product by ID
+// Delete a product by ID
 exports.deleteProduct = async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
@@ -58,11 +58,11 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// Update a Product by ID
+// Update a product by ID
 exports.updateProduct = async (req, res) => {
   try {
     const { name, category, price, description, rating } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : ''; // Handle image upload
+    const image = req.file ? `/uploads/${req.file.filename}` : ""; // Handle image upload
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,

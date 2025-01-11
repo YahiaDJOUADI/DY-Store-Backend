@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-// get all the users
+// Get all users
 exports.getUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -11,7 +11,7 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// get one user by ID
+// Get one user by ID
 exports.getUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -27,39 +27,39 @@ exports.getUser = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch User" });
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 };
 
-// Add a new User
+// Add a new user
 exports.addUser = async (req, res) => {
   try {
-    const { userName, email, phone, password,birthdate, gender } = req.body;
+    const { userName, email, phone, password, birthdate, gender } = req.body;
 
     // Check if the user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists with this email" });
     }
-
-    // Create a new user with default 'user' type
+ 
+    // Create a new user
     const newUser = new User({
       userName,
       email,
       phone,
-      password,  // No password hashing here
+      password,
       birthdate,
       gender,
-      type: 'user',  // Default type is set to 'user'
+      type: "user", // Default type is 'user'
     });
 
     // Save the user to the database
     await newUser.save();
 
-    // Hardcoded JWT secret key (do not use in production, prefer environment variables)
-    const JWT_SECRET = "fheuifheiuhinvqpngatfvegfd";  // Define your secret key here
+    // Hardcoded JWT secret key
+    const JWT_SECRET = "fheuifheiuhinvqpngatfvegfd";
 
-    // Generate JWT token without expiration time
+    // Generate JWT token
     const token = jwt.sign({ id: newUser._id }, JWT_SECRET);
 
     // Send the response with the user and the token
@@ -71,16 +71,16 @@ exports.addUser = async (req, res) => {
         phone: newUser.phone,
         birthdate: newUser.birthdate,
         gender: newUser.gender,
-        type: newUser.type,  // The default 'user' type
+        type: newUser.type,
       },
     });
   } catch (error) {
     console.error("Error adding user:", error);
     res.status(500).json({ error: "Failed to add user" });
   }
-}
+};
 
-// Delete a User by ID
+// Delete a user by ID
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -96,46 +96,45 @@ exports.deleteUser = async (req, res) => {
 
     res.status(200).json({ message: "User deleted successfully", deletedUser });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete User" });
+    res.status(500).json({ error: "Failed to delete user" });
   }
 };
 
-// Update a User by ID
+// Update a user by ID
 exports.updateUser = async (req, res) => {
   try {
-    const userId = req.params.id; // Get user ID from request params
+    const userId = req.params.id;
+
     if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+      return res.status(400).json({ error: "User ID is required" });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId, 
-      req.body, 
-      { new: true } // Return the updated user
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+      new: true, // Return the updated user
+    });
 
     if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(updatedUser);
-  } catch (err) {
-    console.error("Error updating user:", err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 };
-
 
 // Login function
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email, password });
-    if (user) {
-      // Hardcoded JWT secret key for login
-      const JWT_SECRET = "fheuifheiuhinvqpngatfvegfd";  // Define your secret key here
 
-      // Generate JWT token without expiration time
+    if (user) {
+      // Hardcoded JWT secret key
+      const JWT_SECRET = "fheuifheiuhinvqpngatfvegfd";
+
+      // Generate JWT token
       const token = jwt.sign({ id: user._id }, JWT_SECRET);
       res.json({ token });
     } else {
@@ -145,25 +144,23 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-// Add this to your User controller
 
 // Get the authenticated user's details based on the JWT token
-
-
-
 exports.myAccount = async (req, res) => {
   try {
-    // The token should be sent in the Authorization header in the format: Bearer <token>
-    const token = req.headers.authorization?.split(" ")[1]; // Extract token from header
+    // Extract token from header
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({ error: "No token provided" });
     }
 
-    // Verify the JWT token
-    const decoded = jwt.verify(token, "fheuifheiuhinvqpngatfvegfd"); // Use a proper secret key here (move to env vars)
+    // Hardcoded JWT secret key
+    const JWT_SECRET = "fheuifheiuhinvqpngatfvegfd";
 
-    // If token is invalid, return an error
+    // Verify the JWT token
+    const decoded = jwt.verify(token, JWT_SECRET);
+
     if (!decoded || !decoded.id) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -175,7 +172,7 @@ exports.myAccount = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Return user details including the ID
+    // Return user details including the ID and profile picture
     res.status(200).json({
       user: {
         _id: user._id,
@@ -184,7 +181,8 @@ exports.myAccount = async (req, res) => {
         phone: user.phone,
         birthdate: user.birthdate,
         gender: user.gender,
-        type: user.type,  // 'admin' or 'user'
+        type: user.type,
+        profilePicture: user.profilePicture, // Return the relative path
       },
     });
   } catch (error) {
@@ -192,13 +190,11 @@ exports.myAccount = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user account" });
   }
 };
-// Example of promoting a user to admin
+
 // Promote a user to admin
-
-
 exports.promoteToAdmin = async (req, res) => {
   const { id } = req.params;
-  const { type } = req.body; // This will be the new user type
+  const { type } = req.body;
 
   // Check if the logged-in user is authorized (email should be 'yahia@gmail.com')
   if (req.user.email !== "yahia@gmail.com") {

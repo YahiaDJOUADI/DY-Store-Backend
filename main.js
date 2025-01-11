@@ -2,23 +2,29 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 
 // Import Routes
 const usersRoute = require("./routes/usersRoute");
 const productsRoute = require("./routes/productsRoute");
-const orderRoute = require("./routes/orderRoute");
+const cartRoute = require("./routes/cartRoute")
+const messageRoutes = require("./routes/messageRoutes");
+const orderRoute = require("./routes/orderRoute")
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
 // Serve Static Files
-app.use('/public', express.static('public'));
+app.use("/public", express.static("public"));
 
 // Routes
 app.use(usersRoute);
 app.use(productsRoute);
-app.use(orderRoute);
+app.use(cartRoute)
+app.use(messageRoutes)
+app.use(orderRoute)
 
 // Connect to MongoDB
 mongoose

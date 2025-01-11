@@ -1,10 +1,13 @@
 const express = require("express");
-const router = express.Router();
+
 const usersController = require("../controllers/usersController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
+const router = express.Router();
+
+
 // Public routes (no authentication needed)
-router.post("/users", usersController.addUser);
+router.post("/users",  usersController.addUser); // Add a new user
 router.post("/login", usersController.login);
 
 // Protected routes (authentication required)
@@ -18,5 +21,6 @@ router.patch("/users/:id/promote", authMiddleware, usersController.promoteToAdmi
 
 // Protected route for getting authenticated user's details
 router.get("/myAccount", authMiddleware, usersController.myAccount);
+
 
 module.exports = router;

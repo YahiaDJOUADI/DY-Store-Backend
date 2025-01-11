@@ -1,52 +1,42 @@
 const Order = require("../models/Order");
 
 // Create a new order
-exports.addOrder = async (req, res) => {
+const createOrder = async (req, res) => {
+  const { shippingAddress, products, totalPrice, name, phone } = req.body;
+
   try {
-    const { products, totalPrice, status, date } = req.body;
+    // Validate required fields
+    if (!shippingAddress || !products || !totalPrice || !name || !phone) {
+      return res.status(400).json({ message: "Missing required fields." });
+    }
 
-   
-
-    const newOrder = new Order({
+    // Create the order
+    const order = new Order({
+      user: req.user._id, // Only authenticated users can create orders
       products,
-
-      date: Date.now(),
-
-      status,
+      totalPrice,
+      shippingAddress,
+      name,
+      phone,
     });
 
-    // Save the new command
-    await newOrder.save();
-    res.status(201).json(newCommand);
+    await order.save(); // Save the order
+    res.status(201).json({ message: "Order created successfully!", order });
   } catch (error) {
-    res.status(500).json({ error: "Failed to add Command" });
+    console.error("Error creating order:", error);
+    res.status(500).json({ message: "Failed to create order." });
   }
 };
 
-// Get all orders
-exports.getOrders = async (req, res) => {
+// Get all orders for the authenticated user
+const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
-    res.send(orders);
+    const orders = await Order.find({ user: req.user._id }); // Fetch orders for the user
+    res.status(200).json(orders);
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Failed to fetch orders." });
   }
 };
-exports.getOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ error: "Product ID is required." });
-    }
-
-    const order = await Order.findById(id);
-    if (!order) {
-      return res.status(404).json({ error: "Order not found." });
-    }
-
-    res.status(200).json(order);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch Order" });
-  }
-}
+module.exports = { createOrder, getOrders };
